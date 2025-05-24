@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogIn, Gift } from 'lucide-react';
+import { LogIn, Gift, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,7 @@ const LoginPage: React.FC = () => {
   const { currentUser, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [showPopupWarning, setShowPopupWarning] = useState(false);
   
   // Check if there's a redirect path in location state
   const from = location.state?.from || '/';
@@ -23,9 +24,14 @@ const LoginPage: React.FC = () => {
       await signInWithGoogle();
       toast.success('Login successful!');
       navigate(from);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error signing in with Google:', error);
-      toast.error('Failed to sign in with Google');
+      if (error.code === 'auth/popup-blocked') {
+        setShowPopupWarning(true);
+        toast.error('Popup was blocked. Please allow popups for this site.');
+      } else {
+        toast.error('Failed to sign in with Google');
+      }
     }
   };
 
@@ -52,6 +58,17 @@ const LoginPage: React.FC = () => {
             Login to participate in giveaways and track your entries
           </p>
         </div>
+        
+        {showPopupWarning && (
+          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <div className="flex items-center text-yellow-800">
+              <AlertCircle className="h-5 w-5 mr-2" />
+              <p className="text-sm">
+                Please disable your popup blocker or allow popups for this site to sign in with Google.
+              </p>
+            </div>
+          </div>
+        )}
         
         <div className="space-y-4">
           <button

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ref, push, update, remove } from 'firebase/database';
-import { database, auth } from '../../firebase/config';
+import { database } from '../../firebase/config';
 import { Giveaway } from '../../types';
 import { Gift, Calendar, Image, ArrowLeft, Trash2, Plus, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -86,12 +86,6 @@ const AdminGiveawayForm: React.FC<AdminGiveawayFormProps> = ({ giveaway, onClose
     setSubmitting(true);
     
     try {
-      // Check if user is authenticated
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        throw new Error('You must be logged in to perform this action');
-      }
-
       const giveawayData = {
         title: formData.title,
         description: formData.description,
@@ -99,8 +93,7 @@ const AdminGiveawayForm: React.FC<AdminGiveawayFormProps> = ({ giveaway, onClose
         images,
         active: formData.active,
         endDate: formData.endDate ? new Date(formData.endDate).getTime() : null,
-        createdAt: giveaway?.createdAt || Date.now(),
-        createdBy: currentUser.uid // Add the user ID who created/updated the giveaway
+        createdAt: giveaway?.createdAt || Date.now()
       };
       
       if (giveaway) {
@@ -114,7 +107,7 @@ const AdminGiveawayForm: React.FC<AdminGiveawayFormProps> = ({ giveaway, onClose
       onClose();
     } catch (error) {
       console.error('Error saving giveaway:', error);
-      toast.error('Failed to save giveaway. Please make sure you are logged in and try again.');
+      toast.error('Failed to save giveaway');
     } finally {
       setSubmitting(false);
     }
